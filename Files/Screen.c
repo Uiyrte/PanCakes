@@ -29,45 +29,8 @@ endp
 
 
 
-proc Balls.CalcPixelColor\
-     iY, iX
-     finit
-     fild word [iX]
-     fisub word  [iXCenter1]
-     fmul st0, st0
-     fild word [iY]
-     fisub word [iYCenter1]
-     fmul st0, st0
-     fadd st0, st1
-     fsqrt
-     fild word [iRadius1]
-     fdiv st0, st1
-     fstp dword [fTempResult]
-     fild word [iX]
-     fisub word [iXCenter2]
-     fmul st0, st0
-     fild word [iY]
-     fisub word [iYCenter2]
-     fmul st0, st0
-     fadd st0, st1
-     fsqrt
-     fild word [iRadius2]
-     fdiv st0, st1
-     fld dword [fTempResult]
-     fadd st0, st1
-     fld1
-     fxch st1
-     fcomip st1
-     jbe  .BackgroundPixel
-     mov ax, [iColorBall]
-     ret
 
-.BackgroundPixel:
-     mov ax, [iColorBackground]
-     ret
 
-     fTempResult dd ?
-endp
 
 
 

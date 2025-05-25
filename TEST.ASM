@@ -3,9 +3,12 @@
         org 100h
 
 Start:
+        stdcall Settings.AddBall
+        stdcall Settings.AddBall
         stdcall Settings.SetScreenMode, $0013
 
         push ax
+
 
         cli
         push    0
@@ -64,7 +67,8 @@ lp:
         include 'Files/Screen.c'
         include 'Files/Settings.c'
 
-        include 'Files/Screen.di'
+        include 'Files/Screen.h'
+        include 'Files/Random.c'
         include 'Files/Balls.c'
 
 
