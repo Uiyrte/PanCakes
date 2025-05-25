@@ -25,10 +25,11 @@ Start:
 
 
 lp:
-        mov     ah, 00h
+        xor     ah, ah
         int     16h
-        movzx bx, ah
-        stdcall Settings.SetKeys, bx
+        push ax
+        call Settings.SetKeys
+        pop ax
         cmp     ah, 1
         jne     lp
 
@@ -66,11 +67,9 @@ lp:
 
         include 'Files/Screen.c'
         include 'Files/Settings.c'
-
         include 'Files/Screen.h'
         include 'Files/Random.c'
         include 'Files/Balls.c'
-
 
 
 

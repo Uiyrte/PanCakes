@@ -1,4 +1,4 @@
-proc Random.GetNumber uses ax bx, wMod
+proc Random.GetNumber, wMod
     cmp word [Random.wPrevValue], 0
     jne .Get
     mov ah, 2Ch
@@ -7,8 +7,7 @@ proc Random.GetNumber uses ax bx, wMod
 
 .Get:
     mov ax, [Random.wPrevValue]
-    mov bx, 25173
-    mul bx
+    imul cx, cx, 25173
     add ax, 13849
     adc dx, 0
     mov [Random.wPrevValue], ax

@@ -1,12 +1,13 @@
-proc Screen.DrawBalls uses es di bp cx bx ds
+proc Screen.DrawBalls
         mov ax, cs
         add ax, 1000h
         mov es, ax
         mov cx, 64000
-        mov bx, 0
+        push cx
+        xor bx, bx
 .DrawLoop:
         mov ax, bx
-        mov dx, 0
+        xor dx, dx
         push bx
         mov bx, 320
         div bx
@@ -15,13 +16,24 @@ proc Screen.DrawBalls uses es di bp cx bx ds
         mov [es:bx], al
         inc bx
         loop .DrawLoop
-        mov cx, 64000
+        cmp [iResize], 0
+        je .Resize
+        cmp [iCounter], 0
+        je .Resize
+        stdcall Balls.CalcCurrentPixel
+
+.Resize:
+        cmp [iColorMode], 0
+        je .Res
+        stdcall Settings.SetColor
+.Res:
+        pop cx
         push es
         pop ds
         push $a000
         pop es
-        mov di, 0
-        mov si, 0
+        xor di, di
+        xor si, si
         rep movsb
         ret
 endp

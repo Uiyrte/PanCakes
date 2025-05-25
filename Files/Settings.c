@@ -16,99 +16,134 @@ endp
 
 
 
-proc Settings.SetKeys, iKey
-     cmp [iKey], 30
+Settings.SetKeys:
+     cmp ah, 30
      je .IncSpeed
-     cmp [iKey], 44
+     cmp ah, 44
      je .DecSpeed
-     cmp [iKey], 57
+     cmp ah, 45
+     je .Color
+     cmp ah, 46
+     je .BaseColor
+     cmp ah, 47
+     je .Garl
+     cmp ah, 57
      je .GetPause
-     cmp [iKey], 16
+     cmp ah, 16
      je .AddBall
-     cmp [iKey], 17
+     cmp ah, 17
      je .DelBall
+     cmp ah, 18
+     je .OnResize
+     cmp ah, 75
+     je .PrevBall
+     cmp ah, 77
+     je .NextBall
+     cmp ah, 72
+     je .Resize
+     cmp ah, 80
+     je .Resize
 
-     ret
+
+
+     jmp .end
 .IncSpeed:
      cmp [iPause], 0
      jne .end
      cmp [iStep], 15
      jge .end
      inc [iStep]
-     ret
+     jmp .end
 .DecSpeed:
      cmp [iPause], 0
      jne .end
      cmp [iStep], -15
      jle .end
      dec [iStep]
-     ret
+     jmp .end
 .GetPause:
      cmp [iPause], 0
      je .SaveStep
-     mov ax, [iPause]
-     mov [iStep], ax
-     mov [iPause], 0
-     ret
+     mov al, [iPause]
+     mov [iStep], al
+     and [iPause], 0
+     jmp .end
 .SaveStep:
-     mov ax, [iStep]
-     mov [iPause], ax
-     mov [iStep], 0
-     ret
+     mov al, [iStep]
+     mov [iPause], al
+     and [iStep], 0
+     jmp .end
 .AddBall:
      stdcall Settings.AddBall
-     ret
+     jmp .end
 .DelBall:
      cmp [iCounter], 0
      je .end
+     mov ax, [iCurrentBall]
+     inc ax
+     cmp ax, [iCounter]
+     jne .DelNotCurr
+     cmp [iCurrentBall], 0
+     je .DelNotCurr
+     dec [iCurrentBall]
+.DelNotCurr:
      dec [iCounter]
-     ret
-
+     jmp .end
+.OnResize:
+     xor [iResize], 1
+     and [iCurrentBall], 0
+     jmp .end
+.PrevBall:
+     cmp [iCurrentBall], 0
+     je .FromZeroBall
+     dec [iCurrentBall]
+     jmp .end
+.FromZeroBall:
+     mov ax, [iCounter]
+     dec ax
+     mov [iCurrentBall], ax
+     jmp .end
+.NextBall:
+     mov ax, [iCounter]
+     dec ax
+     cmp [iCurrentBall], ax
+     je .ToZeroBall
+     inc [iCurrentBall]
+     jmp .end
+.ToZeroBall:
+     and [iCurrentBall], 0
+     jmp .end
+.Resize:
+     cmp [iResize], 0
+     je .end
+     stdcall Balls.Resize, ax
+     jmp .end
+.Color:
+     stdcall Settings.SetColor
+     and [iColorMode], 0
+     jmp .end
+.BaseColor:
+     mov [iColorBall], 64
+     and [iColorMode], 0
+     jmp .end
+.Garl:
+     xor [iColorMode], 1
 .end:
      ret
-endp
 
-proc Settings.Init uses es ax
+
+
+
+proc Settings.AddBall
         mov ax, cs
         add ax, 2000h
         mov es, ax
-        mov bx, [iXCenter1]
-        mov [es:$0000], bx
-        mov bx, [iYCenter1]
-        mov [es:$0002], bx
-        mov bx, [iRadius1]
-        mov [es:$0004],word  20
-        mov bx, [iXStep1]
-        mov [es:$0006], bx
-        mov bx, [iYStep1]
-        mov [es:$0008], bx
-        mov bx, [iXCenter2]
-        mov [es:$000A], bx
-        mov bx, [iYCenter2]
-        mov [es:$000C], bx
-        mov bx, [iRadius2]
-        mov [es:$000E], bx
-        mov bx, [iXStep2]
-        mov [es:$0010], bx
-        mov bx, [iYStep2]
-        mov [es:$0012], bx
-        ret
-endp
-
-
-
-
-proc Settings.AddBall uses es ax dx bx
-        mov ax, cs
-        add ax, 2000h
-        mov es, ax
-        mov ax, [iCounter]
-        mov bl, 10d
-        mul bl
-        mov bx, ax
-        stdcall Random.GetNumber, 320d
+        imul bx, [iCounter], 10d
+        stdcall Random.GetNumber, 300d
+        add dx, 10
         mov [es:bx], dx
-        stdcall Random.GetNumber, 200d
+        stdcall Random.GetNumber, 180d
+        add dx, 10
         mov [es:bx+2], dx
         stdcall Random.GetNumber, 5d
         add dx, 5
@@ -130,5 +165,19 @@ proc Settings.AddBall uses es ax dx bx
         mov [es:bx+8], word  -1
 .End:
         inc [iCounter]
+        ret
+endp
+
+
+
+
+
+proc Settings.SetColor
+        cmp [iColorBall], 104
+        jne .end
+        mov [iColorBall], 32
+
+.end:
+        inc [iColorBall]
         ret
 endp
